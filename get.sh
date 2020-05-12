@@ -13,7 +13,7 @@ if ! [ -x "$(command -v pup)" ]; then
   exit 1
 fi
 
-if [ "${1:0:37}" = "https://www.cambridge.org/core/books/" ] ; 
+if [ "${1:0:37}" = "https://www.cambridge.org/core/books/" ] ;
 then
 	dir=$(echo "${1}" | cut -d"/" -f"6")
 else
@@ -34,16 +34,24 @@ fi
 #get the contents page
 wget --load-cookies "${pwd}/cookies.txt" "${1}" -O index.html
 
-if ! grep -q "View HTML full" index.html; then
+if grep -q -e "Unfortunately you do not have access to this title"  -e "Check if you have access" index.html; then
+    echo "You don't have access to this title. Exiting"
+    exit
+fi
+
+if ! grep -q -e "View HTML full" -e "Online view" index.html; then
     echo "There is no HTML version of this title. Deleting what was downloaded and exiting."
     cd ../../
     rm -rf "${dir}"
     exit
 fi
 
-if grep -q "Unfortunately you do not have access to this title" index.html; then
-    echo "You don't have access to this title. Exiting"
-    exit
+if grep -q "Online view" index.html; then
+    append="online-view"
+fi
+
+if grep -q "View HTML full" index.html; then
+    append="core-reader"
 fi
 
 #use pup to get the title of the book
@@ -51,7 +59,7 @@ title=$(cat index.html | pup -p '.book-wrapper h1.title text{}' | tr -d '\n')
 
 
 #use pup to get the table of contents urls
-#note that the urls don't link directly to the html - you need to append /core-reader
+#note that the urls don't link directly to the html - you need to append /core-reader or /online-view
 cat index.html | pup ".results-listing a.part-link attr{href}"  > toc.txt
 
 count=0
@@ -60,7 +68,7 @@ do
   count=$(( $count + 1 ))
   order=$(printf %03d $count)
   id=$(echo "${line}" | rev | cut -d"/" -f2 | rev)
-  wget  --load-cookies "${pwd}/cookies.txt" "https://www.cambridge.org$line/core-reader" -O "${order}-${id}.html"
+  wget  --load-cookies "${pwd}/cookies.txt" "https://www.cambridge.org$line/$append" -O "${order}-${id}.html"
 done < "toc.txt"
 
 #create the html from the pages
@@ -69,7 +77,7 @@ cat *.html | pup article >> "../${title}.html"
 echo "</body></html>"  >> "../${title}.html"
 
 if  [ -x "$(command -v pandoc)" ]; then
-  echo 'Creating epub using pandoc...' 
+  echo 'Creating epub using pandoc...'
   pandoc -f html -t epub3 -o "../${title}.epub" "../${title}.html"
   echo "Pandoc's epubs seem much slower than those created manually in Calibre from the HTML. Maybe try that instead?"
 fi
