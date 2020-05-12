@@ -1,12 +1,12 @@
 This shell script downloads the HTML version of books you have access to from [Cambridge Core](https://www.cambridge.org/core/).
 
-##Motivation
+## Motivation
 The Core website lets you download PDFs of some books you have access to, but there is no method to donwnload the HTML. I want the HTML because I can reflow the text and change the font size, and use it with text-to-speech programs. 
 
-##Limitations
+## Limitations
 Some books don't have HTML versions that work with this script. If it says 'View full HTML' on the page, it will work. If it says 'Online view' it will not work. If only PDFs are available, it will not work.
 
-##Instructions
+## Instructions
 Login to Cambridge Core. Use e.g. [cookies.txt Chrome extension](https://chrome.google.com/webstore/detail/cookiestxt/njabckikapfpffapmjgojcnbfjonfjfg) to create a cookies.txt file that this script will use. The cookies.txt file needs to be in the same directory as get.sh
 
 Make get.sh executable: `chmod +x get.sh`
