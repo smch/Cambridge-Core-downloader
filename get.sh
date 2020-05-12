@@ -46,8 +46,13 @@ if ! grep -q -e "View HTML full" -e "Online view" index.html; then
     exit
 fi
 
+#html not accessible with online view...
 if grep -q "Online view" index.html; then
-    append="online-view"
+    echo "The HTML cannot be downloaded in online view, because it is loaded dynamically. Deleting what was downloaded and exiting."
+     cd ../../
+     rm -rf "${dir}"
+     exit
+    #append="online-view"
 fi
 
 if grep -q "View HTML full" index.html; then
@@ -59,7 +64,7 @@ title=$(cat index.html | pup -p '.book-wrapper h1.title text{}' | tr -d '\n')
 
 
 #use pup to get the table of contents urls
-#note that the urls don't link directly to the html - you need to append /core-reader or /online-view
+#note that the urls don't link directly to the html - you need to append .e.g /core-reader
 cat index.html | pup ".results-listing a.part-link attr{href}"  > toc.txt
 
 count=0
